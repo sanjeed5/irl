@@ -8,7 +8,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="theme-color" content="#0a0a0a">
   <title>irl</title>
-  <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+  <script src="qrcode.min.js"></script>
   <style>
     *, *::before, *::after {
       box-sizing: border-box;
@@ -578,9 +578,7 @@
 
       const card = document.createElement('div');
       card.className = `qr-card ${meta.glowClass}`;
-
-      const canvas = document.createElement('canvas');
-      card.appendChild(canvas);
+      card.style.lineHeight = '0';
 
       const metaDiv = document.createElement('div');
       metaDiv.className = 'qr-meta';
@@ -593,12 +591,14 @@
       qrZone.appendChild(card);
       qrZone.appendChild(metaDiv);
 
-      QRCode.toCanvas(canvas, url, {
+      new QRCode(card, {
+        text: url,
         width: size,
-        margin: 0,
-        color: { dark: '#000000', light: '#ffffff' },
-        errorCorrectionLevel: 'M',
-      }).catch(console.error);
+        height: size,
+        colorDark: '#000000',
+        colorLight: '#ffffff',
+        correctLevel: QRCode.CorrectLevel.M,
+      });
     }
 
     /* ── Platform selection ────────────────────────────── */
