@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#0a0a0a">
+  <title>irl</title>
+  <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+  <style>
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    :root {
+      --bg: #0a0a0a;
+      --surface: #161616;
+      --surface-2: #1f1f1f;
+      --border: #2a2a2a;
+      --text: #f2f2f2;
+      --text-muted: #777;
+      --text-dim: #444;
+      --x-color: #e7e9ea;
+      --x-glow: rgba(231, 233, 234, 0.12);
+      --linkedin-color: #0A66C2;
+      --linkedin-glow: rgba(10, 102, 194, 0.12);
+      --website-color: #7c3aed;
+      --website-glow: rgba(124, 58, 237, 0.12);
+      --radius-sm: 10px;
+      --radius: 16px;
+      --radius-lg: 24px;
+    }
+
+    html, body {
+      height: 100%;
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', sans-serif;
+      overflow: hidden;
+      overscroll-behavior: none;
+    }
+
+    .view {
+      display: none;
+      height: 100%;
+      height: 100dvh;
+      flex-direction: column;
+    }
+
+    .view.active {
+      display: flex;
+    }
+
+    /* ── SETUP / EDIT VIEW ─────────────────────────────── */
+
+    #setup-view {
+      overflow-y: auto;
+      overscroll-behavior: contain;
+      padding: env(safe-area-inset-top, 0) 0 env(safe-area-inset-bottom, 0);
+    }
+
+    .setup-inner {
+      min-height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 32px;
+      padding: 48px 24px 40px;
+    }
+
+    .app-brand {
+      text-align: center;
+    }
+
+    .app-wordmark {
+      font-size: 2.4rem;
+      font-weight: 900;
+      letter-spacing: -0.06em;
+      line-height: 1;
+    }
+
+    .app-tagline {
+      font-size: 0.875rem;
+      color: var(--text-muted);
+      margin-top: 8px;
+      letter-spacing: 0.01em;
+    }
+
+    .form-fields {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+    }
+
+    .field-label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+
+    .field-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .field.x     .field-dot { background: var(--x-color); }
+    .field.linkedin .field-dot { background: var(--linkedin-color); }
+    .field.website  .field-dot { background: var(--website-color); }
+
+    .field-input {
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 13px 15px;
+      font-size: 1rem;
+      color: var(--text);
+      width: 100%;
+      outline: none;
+      transition: border-color 0.18s;
+      appearance: none;
+      -webkit-appearance: none;
+    }
+
+    .field-input:focus {
+      border-color: #484848;
+    }
+
+    .field-input::placeholder {
+      color: var(--text-dim);
+    }
+
+    .field.x     .field-input:focus { border-color: #666; }
+    .field.linkedin .field-input:focus { border-color: var(--linkedin-color); }
+    .field.website  .field-input:focus { border-color: var(--website-color); }
+
+    .form-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .btn-save {
+      background: var(--text);
+      color: #0a0a0a;
+      border: none;
+      border-radius: var(--radius-sm);
+      padding: 15px;
+      font-size: 0.95rem;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: inherit;
+      transition: opacity 0.15s;
+      letter-spacing: 0.01em;
+    }
+
+    .btn-save:active { opacity: 0.8; }
+
+    .btn-cancel {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      padding: 12px;
+      font-size: 0.9rem;
+      cursor: pointer;
+      font-family: inherit;
+      text-align: center;
+      transition: color 0.15s;
+    }
+
+    .btn-cancel:active { color: var(--text); }
+    .btn-cancel.hidden { display: none; }
+
+    .error-msg {
+      font-size: 0.8rem;
+      color: #f87171;
+      text-align: center;
+      min-height: 1em;
+    }
+
+    /* ── MAIN VIEW ─────────────────────────────────────── */
+
+    #main-view {
+      padding-bottom: env(safe-area-inset-bottom, 0);
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 20px;
+      padding-top: max(16px, env(safe-area-inset-top, 16px));
+      flex-shrink: 0;
+    }
+
+    .topbar-wordmark {
+      font-size: 1.25rem;
+      font-weight: 900;
+      letter-spacing: -0.05em;
+    }
+
+    .btn-edit {
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--text-muted);
+      padding: 7px 14px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: inherit;
+      transition: border-color 0.15s, color 0.15s;
+      letter-spacing: 0.02em;
+    }
+
+    .btn-edit:active {
+      color: var(--text);
+      border-color: #484848;
+    }
+
+    /* QR display area */
+
+    .qr-zone {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 12px 24px;
+      gap: 14px;
+      min-height: 0;
+    }
+
+    .qr-card {
+      background: #fff;
+      border-radius: var(--radius-lg);
+      padding: 18px;
+      box-shadow: 0 0 0 1px rgba(255,255,255,0.04), 0 24px 80px rgba(0,0,0,0.6);
+      transition: box-shadow 0.25s;
+    }
+
+    .qr-card.x-glow        { box-shadow: 0 0 0 1px rgba(255,255,255,0.04), 0 24px 80px rgba(0,0,0,0.6), 0 0 40px 4px var(--x-glow); }
+    .qr-card.linkedin-glow { box-shadow: 0 0 0 1px rgba(255,255,255,0.04), 0 24px 80px rgba(0,0,0,0.6), 0 0 40px 8px var(--linkedin-glow); }
+    .qr-card.website-glow  { box-shadow: 0 0 0 1px rgba(255,255,255,0.04), 0 24px 80px rgba(0,0,0,0.6), 0 0 40px 8px var(--website-glow); }
+
+    .qr-card canvas {
+      display: block;
+    }
+
+    .qr-meta {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .qr-platform-name {
+      font-size: 0.95rem;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      color: var(--text);
+    }
+
+    .qr-url-display {
+      font-size: 0.75rem;
+      color: var(--text-dim);
+      max-width: 280px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .empty-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      color: var(--text-muted);
+      text-align: center;
+    }
+
+    .empty-state svg {
+      opacity: 0.25;
+    }
+
+    .empty-state p {
+      font-size: 0.9rem;
+      line-height: 1.5;
+    }
+
+    /* Platform switcher */
+
+    .switcher {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      padding: 14px 16px 16px;
+      flex-shrink: 0;
+    }
+
+    .platform-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      padding: 15px 8px;
+      border-radius: var(--radius);
+      border: 2px solid transparent;
+      background: var(--surface);
+      cursor: pointer;
+      font-family: inherit;
+      transition: background 0.15s, border-color 0.15s, opacity 0.15s;
+      color: var(--text-muted);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .platform-btn:active:not(:disabled) {
+      opacity: 0.75;
+    }
+
+    .platform-btn:disabled {
+      opacity: 0.25;
+      cursor: default;
+    }
+
+    .platform-btn .p-icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      flex-shrink: 0;
+    }
+
+    .platform-btn .p-label {
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      white-space: nowrap;
+    }
+
+    /* Active states */
+    .platform-btn[data-p="x"].active {
+      border-color: var(--x-color);
+      background: var(--x-glow);
+      color: var(--x-color);
+    }
+
+    .platform-btn[data-p="linkedin"].active {
+      border-color: var(--linkedin-color);
+      background: var(--linkedin-glow);
+      color: var(--linkedin-color);
+    }
+
+    .platform-btn[data-p="website"].active {
+      border-color: var(--website-color);
+      background: var(--website-glow);
+      color: var(--website-color);
+    }
+
+    /* Wake-lock indicator */
+    .wake-indicator {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #22c55e;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+
+    .wake-indicator.on { opacity: 1; }
+
+    /* Subtle entrance animation */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .qr-card { animation: fadeUp 0.25s ease; }
+  </style>
+</head>
+<body>
+
+  <!-- ── SETUP / EDIT VIEW ─────────────────────────────── -->
+  <div id="setup-view" class="view">
+    <div class="setup-inner">
+      <div class="app-brand">
+        <div class="app-wordmark">irl</div>
+        <div class="app-tagline">your links, ready to scan</div>
+      </div>
+
+      <div class="form-fields">
+        <div class="field x">
+          <div class="field-label">
+            <span class="field-dot"></span>
+            X / Twitter
+          </div>
+          <input id="inp-x" class="field-input" type="url" inputmode="url"
+                 placeholder="https://x.com/username"
+                 autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+        </div>
+
+        <div class="field linkedin">
+          <div class="field-label">
+            <span class="field-dot"></span>
+            LinkedIn
+          </div>
+          <input id="inp-linkedin" class="field-input" type="url" inputmode="url"
+                 placeholder="https://linkedin.com/in/name"
+                 autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+        </div>
+
+        <div class="field website">
+          <div class="field-label">
+            <span class="field-dot"></span>
+            Website
+          </div>
+          <input id="inp-website" class="field-input" type="url" inputmode="url"
+                 placeholder="https://yoursite.com"
+                 autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <div class="error-msg" id="error-msg"></div>
+        <button class="btn-save" id="btn-save">Save Links</button>
+        <button class="btn-cancel hidden" id="btn-cancel">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── MAIN VIEW ─────────────────────────────────────── -->
+  <div id="main-view" class="view">
+    <div class="topbar">
+      <div class="topbar-wordmark">irl</div>
+      <button class="btn-edit" id="btn-edit">Edit</button>
+    </div>
+
+    <div class="qr-zone" id="qr-zone">
+      <!-- rendered by JS -->
+    </div>
+
+    <div class="switcher">
+      <button class="platform-btn" data-p="x" id="pbtn-x" disabled>
+        <span class="p-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.748l7.73-8.835L1.254 2.25H8.08l4.26 5.635L18.244 2.25zm-1.161 17.52h1.833L7.084 4.126H5.117L17.083 19.77z"/>
+          </svg>
+        </span>
+        <span class="p-label">X</span>
+        <span class="wake-indicator" id="wake-dot"></span>
+      </button>
+
+      <button class="platform-btn" data-p="linkedin" id="pbtn-linkedin" disabled>
+        <span class="p-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+          </svg>
+        </span>
+        <span class="p-label">LinkedIn</span>
+      </button>
+
+      <button class="platform-btn" data-p="website" id="pbtn-website" disabled>
+        <span class="p-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="12" cy="12" r="10"/>
+            <path d="M2 12h20M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/>
+          </svg>
+        </span>
+        <span class="p-label">Website</span>
+      </button>
+    </div>
+  </div>
+
+  <script>
+    /* ── State ─────────────────────────────────────────── */
+    const STORAGE_KEY = 'irl_v1';
+
+    const state = {
+      links: { x: '', linkedin: '', website: '' },
+      active: null,
+    };
+
+    /* ── DOM refs ──────────────────────────────────────── */
+    const setupView  = document.getElementById('setup-view');
+    const mainView   = document.getElementById('main-view');
+    const inpX       = document.getElementById('inp-x');
+    const inpLI      = document.getElementById('inp-linkedin');
+    const inpWS      = document.getElementById('inp-website');
+    const btnSave    = document.getElementById('btn-save');
+    const btnCancel  = document.getElementById('btn-cancel');
+    const btnEdit    = document.getElementById('btn-edit');
+    const qrZone     = document.getElementById('qr-zone');
+    const pbtnX      = document.getElementById('pbtn-x');
+    const pbtnLI     = document.getElementById('pbtn-linkedin');
+    const pbtnWS     = document.getElementById('pbtn-website');
+    const errorMsg   = document.getElementById('error-msg');
+    const wakeDot    = document.getElementById('wake-dot');
+
+    /* ── Persistence ───────────────────────────────────── */
+    function persist() {
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state.links)); } catch (_) {}
+    }
+
+    function hydrate() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (raw) { Object.assign(state.links, JSON.parse(raw)); return true; }
+      } catch (_) {}
+      return false;
+    }
+
+    /* ── Wake Lock ─────────────────────────────────────── */
+    let wakeLock = null;
+
+    async function acquireWakeLock() {
+      if (!('wakeLock' in navigator)) return;
+      try {
+        wakeLock = await navigator.wakeLock.request('screen');
+        wakeDot.classList.add('on');
+        wakeLock.addEventListener('release', () => {
+          wakeDot.classList.remove('on');
+          wakeLock = null;
+        });
+      } catch (_) {}
+    }
+
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible' && !wakeLock && mainView.classList.contains('active')) {
+        acquireWakeLock();
+      }
+    });
+
+    /* ── QR rendering ──────────────────────────────────── */
+    const PLATFORM_META = {
+      x:        { label: 'X / Twitter', glowClass: 'x-glow' },
+      linkedin: { label: 'LinkedIn',    glowClass: 'linkedin-glow' },
+      website:  { label: 'Website',     glowClass: 'website-glow' },
+    };
+
+    function qrSize() {
+      const vw = window.innerWidth;
+      const vh = window.innerHeight;
+      // Reserve space: topbar ~64px, switcher ~100px, meta ~48px, padding ~64px, card padding 36px
+      const available = Math.min(vw - 48, vh - 64 - 100 - 48 - 64) - 36;
+      return Math.max(180, Math.min(available, 340));
+    }
+
+    function renderQR(platform) {
+      const url = state.links[platform];
+      if (!url) return;
+
+      const meta = PLATFORM_META[platform];
+      const size = qrSize();
+
+      const card = document.createElement('div');
+      card.className = `qr-card ${meta.glowClass}`;
+
+      const canvas = document.createElement('canvas');
+      card.appendChild(canvas);
+
+      const metaDiv = document.createElement('div');
+      metaDiv.className = 'qr-meta';
+      metaDiv.innerHTML = `
+        <div class="qr-platform-name">${meta.label}</div>
+        <div class="qr-url-display">${url}</div>
+      `;
+
+      qrZone.innerHTML = '';
+      qrZone.appendChild(card);
+      qrZone.appendChild(metaDiv);
+
+      QRCode.toCanvas(canvas, url, {
+        width: size,
+        margin: 0,
+        color: { dark: '#000000', light: '#ffffff' },
+        errorCorrectionLevel: 'M',
+      }).catch(console.error);
+    }
+
+    /* ── Platform selection ────────────────────────────── */
+    function selectPlatform(platform) {
+      if (!state.links[platform]) return;
+      state.active = platform;
+
+      [pbtnX, pbtnLI, pbtnWS].forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.p === platform);
+      });
+
+      renderQR(platform);
+    }
+
+    function firstAvailable() {
+      return ['x', 'linkedin', 'website'].find(p => state.links[p]) || null;
+    }
+
+    /* ── View management ───────────────────────────────── */
+    function showMain() {
+      pbtnX.disabled  = !state.links.x;
+      pbtnLI.disabled = !state.links.linkedin;
+      pbtnWS.disabled = !state.links.website;
+
+      const platform = (state.active && state.links[state.active])
+        ? state.active
+        : firstAvailable();
+
+      if (platform) {
+        selectPlatform(platform);
+      } else {
+        qrZone.innerHTML = `
+          <div class="empty-state">
+            <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/>
+              <rect x="3" y="14" width="7" height="7" rx="1"/>
+              <path d="M14 14h2v2h-2zM18 14h3v2h-3zM14 18h1v3h-1zM17 18h4v3h-4z"/>
+            </svg>
+            <p>No links saved yet.<br>Tap <strong>Edit</strong> to add yours.</p>
+          </div>`;
+      }
+
+      setupView.classList.remove('active');
+      mainView.classList.add('active');
+      acquireWakeLock();
+    }
+
+    function showSetup(isEdit = false) {
+      inpX.value  = state.links.x  || '';
+      inpLI.value = state.links.linkedin || '';
+      inpWS.value = state.links.website  || '';
+      errorMsg.textContent = '';
+      btnCancel.classList.toggle('hidden', !isEdit);
+
+      mainView.classList.remove('active');
+      setupView.classList.add('active');
+    }
+
+    /* ── Event listeners ───────────────────────────────── */
+    btnSave.addEventListener('click', () => {
+      const x       = inpX.value.trim();
+      const linkedin = inpLI.value.trim();
+      const website  = inpWS.value.trim();
+
+      if (!x && !linkedin && !website) {
+        errorMsg.textContent = 'Add at least one link to continue.';
+        inpX.focus();
+        return;
+      }
+
+      errorMsg.textContent = '';
+      state.links = { x, linkedin, website };
+      persist();
+
+      if (state.active && !state.links[state.active]) {
+        state.active = null;
+      }
+
+      showMain();
+    });
+
+    btnCancel.addEventListener('click', showMain);
+
+    btnEdit.addEventListener('click', () => showSetup(true));
+
+    pbtnX.addEventListener('click',  () => selectPlatform('x'));
+    pbtnLI.addEventListener('click', () => selectPlatform('linkedin'));
+    pbtnWS.addEventListener('click', () => selectPlatform('website'));
+
+    /* Re-render QR on resize / orientation change */
+    window.addEventListener('resize', () => {
+      if (state.active && mainView.classList.contains('active')) {
+        renderQR(state.active);
+      }
+    });
+
+    /* ── Boot ──────────────────────────────────────────── */
+    const hasData = hydrate();
+    if (hasData && firstAvailable()) {
+      showMain();
+    } else {
+      showSetup(false);
+    }
+  </script>
+</body>
+</html>
