@@ -1,0 +1,285 @@
+:root {
+  color-scheme: light;
+  --bg: #eef2ff;
+  --surface: #ffffff;
+  --surface-soft: #f8faff;
+  --text: #111827;
+  --muted: #4b5563;
+  --border: #d7def2;
+  --primary: #111827;
+  --primary-contrast: #ffffff;
+  --accent: #4f46e5;
+  --accent-soft: #e0e7ff;
+  --danger: #b91c1c;
+  --shadow: 0 22px 60px rgba(15, 23, 42, 0.12);
+  font-family:
+    Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at top, #ffffff 0%, #eef2ff 45%, #e2e8f0 100%);
+  color: var(--text);
+}
+
+button,
+input {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+a {
+  color: inherit;
+}
+
+.app-shell {
+  width: min(100%, 34rem);
+  margin: 0 auto;
+  padding: 1rem 1rem calc(2rem + env(safe-area-inset-bottom));
+  display: grid;
+  gap: 1rem;
+}
+
+.app-header,
+.card {
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(14px);
+  border: 1px solid rgba(255, 255, 255, 0.75);
+  border-radius: 1.5rem;
+  box-shadow: var(--shadow);
+}
+
+.app-header {
+  padding: 1.25rem;
+  display: grid;
+  gap: 1rem;
+}
+
+.eyebrow {
+  margin: 0 0 0.35rem;
+  color: var(--accent);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.75rem;
+}
+
+.app-header h1,
+.section-heading h2 {
+  margin: 0;
+  line-height: 1.1;
+}
+
+.subtitle,
+.section-heading p,
+.form-hint,
+.scan-tip,
+.status-message {
+  margin: 0;
+  color: var(--muted);
+}
+
+.ghost-button,
+.primary-button,
+.secondary-button,
+.platform-button {
+  border-radius: 999px;
+  border: 1px solid transparent;
+  transition:
+    transform 160ms ease,
+    background-color 160ms ease,
+    color 160ms ease,
+    border-color 160ms ease,
+    opacity 160ms ease;
+}
+
+.ghost-button,
+.secondary-button {
+  background: var(--surface-soft);
+  border-color: var(--border);
+  color: var(--text);
+}
+
+.ghost-button,
+.secondary-button,
+.primary-button {
+  min-height: 2.9rem;
+  padding: 0.85rem 1rem;
+  font-weight: 600;
+}
+
+.ghost-button:active,
+.primary-button:active,
+.secondary-button:active,
+.platform-button:active {
+  transform: scale(0.98);
+}
+
+.primary-button {
+  background: var(--primary);
+  color: var(--primary-contrast);
+}
+
+.card {
+  padding: 1.15rem;
+  display: grid;
+  gap: 1rem;
+}
+
+.section-heading {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.link-form {
+  display: grid;
+  gap: 0.9rem;
+}
+
+.input-group {
+  display: grid;
+  gap: 0.45rem;
+}
+
+.input-group span {
+  font-weight: 600;
+}
+
+.input-group input {
+  min-height: 3.35rem;
+  padding: 0.95rem 1rem;
+  border-radius: 1rem;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+}
+
+.input-group input:focus {
+  outline: 2px solid var(--accent-soft);
+  border-color: var(--accent);
+}
+
+.form-actions {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.75rem;
+}
+
+.platform-switcher {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.65rem;
+}
+
+.platform-button {
+  min-height: 3.5rem;
+  padding: 0.9rem 0.6rem;
+  background: var(--surface-soft);
+  border-color: var(--border);
+  color: var(--text);
+  font-weight: 700;
+}
+
+.platform-button.is-active {
+  background: var(--primary);
+  color: var(--primary-contrast);
+  border-color: var(--primary);
+}
+
+.platform-button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.qr-frame {
+  padding: 1rem;
+  border-radius: 1.4rem;
+  background:
+    linear-gradient(180deg, #ffffff 0%, #f8faff 100%);
+  border: 1px solid var(--border);
+}
+
+.qr-code {
+  min-height: min(72vw, 20rem);
+  display: grid;
+  place-items: center;
+  border-radius: 1rem;
+  background: #ffffff;
+}
+
+.qr-code img {
+  display: block;
+  width: min(100%, 20rem);
+  height: auto;
+  border-radius: 1rem;
+}
+
+.qr-empty {
+  max-width: 16rem;
+  text-align: center;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.selected-meta {
+  display: grid;
+  gap: 0.45rem;
+  text-align: center;
+}
+
+.selected-label {
+  margin: 0;
+  font-weight: 700;
+  font-size: 1.1rem;
+}
+
+.selected-link {
+  word-break: break-word;
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.status-message {
+  min-height: 1.5rem;
+  text-align: center;
+  font-size: 0.95rem;
+}
+
+.status-message.is-error {
+  color: var(--danger);
+}
+
+.status-message.is-success {
+  color: #166534;
+}
+
+@media (min-width: 720px) {
+  .app-shell {
+    width: min(100%, 58rem);
+    padding-top: 1.5rem;
+  }
+
+  .app-header {
+    grid-template-columns: 1fr auto;
+    align-items: start;
+  }
+
+  .form-actions {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .viewer-card,
+  .form-card {
+    padding: 1.4rem;
+  }
+}

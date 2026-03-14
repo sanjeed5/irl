@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Social QR</title>
+    <meta
+      name="description"
+      content="Display large QR codes for your social and profile links."
+    />
+    <link rel="stylesheet" href="./styles.css" />
+    <script
+      defer
+      src="https://cdn.jsdelivr.net/npm/qrcode-generator@2.0.4/qrcode.min.js"
+    ></script>
+    <script defer src="./script.js"></script>
+  </head>
+  <body>
+    <main class="app-shell">
+      <header class="app-header">
+        <div>
+          <p class="eyebrow">Social QR</p>
+          <h1>Show your profiles fast</h1>
+          <p class="subtitle">Tap a platform and hold up your phone to share.</p>
+        </div>
+        <button id="edit-toggle" class="ghost-button" type="button">
+          Edit links
+        </button>
+      </header>
+
+      <section id="setup-card" class="card form-card" hidden>
+        <div class="section-heading">
+          <h2>Your links</h2>
+          <p>Paste the links you want ready at events. Add one or all three.</p>
+        </div>
+
+        <form id="link-form" class="link-form" novalidate>
+          <label class="input-group" for="x-url">
+            <span>X URL</span>
+            <input
+              id="x-url"
+              name="x"
+              type="url"
+              inputmode="url"
+              placeholder="x.com/yourname"
+              autocomplete="url"
+            />
+          </label>
+
+          <label class="input-group" for="linkedin-url">
+            <span>LinkedIn URL</span>
+            <input
+              id="linkedin-url"
+              name="linkedin"
+              type="url"
+              inputmode="url"
+              placeholder="linkedin.com/in/yourname"
+              autocomplete="url"
+            />
+          </label>
+
+          <label class="input-group" for="website-url">
+            <span>Website URL</span>
+            <input
+              id="website-url"
+              name="website"
+              type="url"
+              inputmode="url"
+              placeholder="yoursite.com"
+              autocomplete="url"
+            />
+          </label>
+
+          <p class="form-hint">
+            If you skip https://, it will be added automatically.
+          </p>
+
+          <div class="form-actions">
+            <button class="primary-button" type="submit">Save links</button>
+            <button
+              id="cancel-edit"
+              class="secondary-button"
+              type="button"
+              hidden
+            >
+              Cancel
+            </button>
+          </div>
+        </form>
+      </section>
+
+      <section class="card viewer-card">
+        <div class="section-heading">
+          <h2>Ready to scan</h2>
+          <p>Choose a profile and show the code full-screen style.</p>
+        </div>
+
+        <div
+          id="platform-switcher"
+          class="platform-switcher"
+          role="tablist"
+          aria-label="Select a profile QR code"
+        ></div>
+
+        <div class="qr-frame">
+          <div id="qr-code" class="qr-code" aria-live="polite"></div>
+        </div>
+
+        <div class="selected-meta">
+          <p id="selected-label" class="selected-label">Add a link to begin</p>
+          <a
+            id="selected-link"
+            class="selected-link"
+            href="#"
+            target="_blank"
+            rel="noreferrer"
+            hidden
+          ></a>
+          <p class="scan-tip">Tip: turn up your screen brightness for easier scans.</p>
+        </div>
+      </section>
+
+      <p id="status-message" class="status-message" aria-live="polite"></p>
+    </main>
+  </body>
+</html>
