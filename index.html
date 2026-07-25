@@ -1,126 +1,234 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Social QR</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#f5f7fb" />
     <meta
       name="description"
-      content="Display large QR codes for your social and profile links."
+      content="Share your social profiles instantly with a large, scannable QR code."
     />
+    <title>Social QR</title>
+    <link rel="icon" href="./favicon.svg" type="image/svg+xml" />
     <link rel="stylesheet" href="./styles.css" />
-    <script
-      defer
-      src="https://cdn.jsdelivr.net/npm/qrcode-generator@2.0.4/dist/qrcode.js"
-    ></script>
+    <script defer src="./vendor/qrcode.js"></script>
+    <script defer src="./link-utils.js"></script>
     <script defer src="./script.js"></script>
   </head>
   <body>
-    <main class="app-shell">
-      <header class="app-header">
-        <div>
-          <p class="eyebrow">Social QR</p>
-          <h1>Show your profiles fast</h1>
-          <p class="subtitle">Tap a platform and hold up your phone to share.</p>
-        </div>
-        <button id="edit-toggle" class="ghost-button" type="button">
-          Edit links
+    <div class="page-glow page-glow-one" aria-hidden="true"></div>
+    <div class="page-glow page-glow-two" aria-hidden="true"></div>
+
+    <div class="app-shell">
+      <header class="topbar">
+        <a class="brand" href="./" aria-label="Social QR home">
+          <span class="brand-mark" aria-hidden="true">QR</span>
+          <span>
+            <strong>Social QR</strong>
+            <small>Share profiles in person</small>
+          </span>
+        </a>
+        <button id="edit-button" class="text-button" type="button" hidden>
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M12 20h9" />
+            <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L8 18l-4 1 1-4Z" />
+          </svg>
+          Edit
         </button>
       </header>
 
-      <section id="setup-card" class="card form-card" hidden>
-        <div class="section-heading">
-          <h2>Your links</h2>
-          <p>Paste the links you want ready at events. Add one or all three.</p>
-        </div>
-
-        <form id="link-form" class="link-form" novalidate>
-          <label class="input-group" for="x-url">
-            <span>X URL</span>
-            <input
-              id="x-url"
-              name="x"
-              type="url"
-              inputmode="url"
-              placeholder="x.com/yourname"
-              autocomplete="url"
-            />
-          </label>
-
-          <label class="input-group" for="linkedin-url">
-            <span>LinkedIn URL</span>
-            <input
-              id="linkedin-url"
-              name="linkedin"
-              type="url"
-              inputmode="url"
-              placeholder="linkedin.com/in/yourname"
-              autocomplete="url"
-            />
-          </label>
-
-          <label class="input-group" for="website-url">
-            <span>Website URL</span>
-            <input
-              id="website-url"
-              name="website"
-              type="url"
-              inputmode="url"
-              placeholder="yoursite.com"
-              autocomplete="url"
-            />
-          </label>
-
-          <p class="form-hint">
-            If you skip https://, it will be added automatically.
-          </p>
-
-          <div class="form-actions">
-            <button class="primary-button" type="submit">Save links</button>
-            <button
-              id="cancel-edit"
-              class="secondary-button"
-              type="button"
-              hidden
-            >
-              Cancel
-            </button>
+      <main>
+        <section id="setup-view" class="view setup-view" aria-labelledby="setup-title" hidden>
+          <div class="intro">
+            <p class="eyebrow">Set up once</p>
+            <h1 id="setup-title">One scan. You’re connected.</h1>
+            <p>
+              Add the profiles you share most. You can paste a full link or just
+              your handle.
+            </p>
           </div>
-        </form>
-      </section>
 
-      <section class="card viewer-card">
-        <div class="section-heading">
-          <h2>Ready to scan</h2>
-          <p>Choose a profile and show the code full-screen style.</p>
+          <form id="link-form" class="setup-card" novalidate>
+            <div class="field-group">
+              <label for="x-url">
+                <span class="platform-mark platform-mark-x" aria-hidden="true">X</span>
+                <span>
+                  <strong>X</strong>
+                  <small>Handle or profile link</small>
+                </span>
+              </label>
+              <input
+                id="x-url"
+                name="x"
+                type="text"
+                inputmode="url"
+                autocapitalize="none"
+                autocomplete="off"
+                spellcheck="false"
+                placeholder="@yourhandle"
+                aria-describedby="x-error"
+              />
+              <p id="x-error" class="field-error" aria-live="polite"></p>
+            </div>
+
+            <div class="field-group">
+              <label for="linkedin-url">
+                <span class="platform-mark platform-mark-linkedin" aria-hidden="true">in</span>
+                <span>
+                  <strong>LinkedIn</strong>
+                  <small>Profile handle or link</small>
+                </span>
+              </label>
+              <input
+                id="linkedin-url"
+                name="linkedin"
+                type="text"
+                inputmode="url"
+                autocapitalize="none"
+                autocomplete="off"
+                spellcheck="false"
+                placeholder="your-profile-handle"
+                aria-describedby="linkedin-error"
+              />
+              <p id="linkedin-error" class="field-error" aria-live="polite"></p>
+            </div>
+
+            <div class="field-group">
+              <label for="website-url">
+                <span class="platform-mark platform-mark-web" aria-hidden="true">
+                  <svg viewBox="0 0 24 24">
+                    <circle cx="12" cy="12" r="9" />
+                    <path d="M3 12h18M12 3a15 15 0 0 1 0 18M12 3a15 15 0 0 0 0 18" />
+                  </svg>
+                </span>
+                <span>
+                  <strong>Website</strong>
+                  <small>Personal site or portfolio</small>
+                </span>
+              </label>
+              <input
+                id="website-url"
+                name="website"
+                type="text"
+                inputmode="url"
+                autocapitalize="none"
+                autocomplete="url"
+                spellcheck="false"
+                placeholder="yourwebsite.com"
+                aria-describedby="website-error"
+              />
+              <p id="website-error" class="field-error" aria-live="polite"></p>
+            </div>
+
+            <div class="form-actions">
+              <button class="primary-button" type="submit">
+                Save and show my QR
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="m9 18 6-6-6-6" />
+                </svg>
+              </button>
+              <button id="cancel-button" class="secondary-button" type="button" hidden>
+                Cancel
+              </button>
+            </div>
+
+            <div class="privacy-note">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <rect x="5" y="10" width="14" height="10" rx="2" />
+                <path d="M8 10V7a4 4 0 0 1 8 0v3" />
+              </svg>
+              <span><strong>Private by default.</strong> Links stay on this device.</span>
+            </div>
+
+            <button id="clear-data-button" class="danger-button" type="button" hidden>
+              Clear saved data from this device
+            </button>
+          </form>
+        </section>
+
+        <section id="share-view" class="view share-view" aria-labelledby="share-title" hidden>
+          <div class="intro share-intro">
+            <p class="eyebrow">Ready to share</p>
+            <h1 id="share-title">Hold it up. Let them scan.</h1>
+            <p>Choose a profile, then point the other phone’s camera at the code.</p>
+          </div>
+
+          <div
+            id="platform-switcher"
+            class="platform-switcher"
+            role="tablist"
+            aria-label="Choose a profile to share"
+          ></div>
+
+          <figure class="qr-stage">
+            <button
+              id="qr-surface"
+              class="qr-surface"
+              type="button"
+              aria-label="Open this QR code in presentation mode"
+            >
+              <div id="qr-code" class="qr-code" aria-live="polite"></div>
+            </button>
+            <figcaption>
+              <span id="selected-platform" class="selected-platform"></span>
+              <span id="selected-value" class="selected-value"></span>
+            </figcaption>
+          </figure>
+
+          <div class="share-actions">
+            <button id="present-button" class="primary-button present-button" type="button">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M8 3H5a2 2 0 0 0-2 2v3M16 3h3a2 2 0 0 1 2 2v3M8 21H5a2 2 0 0 1-2-2v-3M16 21h3a2 2 0 0 0 2-2v-3" />
+              </svg>
+              Show full screen
+            </button>
+            <div class="secondary-actions">
+              <button id="copy-button" class="secondary-button" type="button">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <rect x="8" y="8" width="11" height="11" rx="2" />
+                  <path d="M16 8V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h3" />
+                </svg>
+                <span id="copy-label">Copy link</span>
+              </button>
+              <a id="open-link" class="secondary-button" href="#" target="_blank" rel="noreferrer">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M15 3h6v6M10 14 21 3M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+                </svg>
+                Open
+              </a>
+            </div>
+          </div>
+
+          <p class="local-note">
+            No account. No upload. Your saved links never leave this browser.
+          </p>
+        </section>
+      </main>
+    </div>
+
+    <div
+      id="presentation-view"
+      class="presentation-view"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="presentation-title"
+      hidden
+    >
+      <button id="close-presentation" class="close-button" type="button" aria-label="Close full screen">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="m6 6 12 12M18 6 6 18" />
+        </svg>
+      </button>
+      <div class="presentation-content">
+        <div id="presentation-qr" class="presentation-qr"></div>
+        <div>
+          <p id="presentation-kicker" class="presentation-kicker"></p>
+          <h2 id="presentation-title">Scan to connect</h2>
+          <p>Open your camera and point it at the code.</p>
         </div>
+      </div>
+    </div>
 
-        <div
-          id="platform-switcher"
-          class="platform-switcher"
-          role="tablist"
-          aria-label="Select a profile QR code"
-        ></div>
-
-        <div class="qr-frame">
-          <div id="qr-code" class="qr-code" aria-live="polite"></div>
-        </div>
-
-        <div class="selected-meta">
-          <p id="selected-label" class="selected-label">Add a link to begin</p>
-          <a
-            id="selected-link"
-            class="selected-link"
-            href="#"
-            target="_blank"
-            rel="noreferrer"
-            hidden
-          ></a>
-          <p class="scan-tip">Tip: turn up your screen brightness for easier scans.</p>
-        </div>
-      </section>
-
-      <p id="status-message" class="status-message" aria-live="polite"></p>
-    </main>
+    <p id="status-message" class="status-message" role="status" aria-live="polite" hidden></p>
   </body>
 </html>
